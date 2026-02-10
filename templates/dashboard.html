@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ollama Chat UI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+        }
+        #chat {
+            background: #ffffff;
+            padding: 15px;
+            height: 350px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .user {
+            color: #0066cc;
+            margin: 8px 0;
+        }
+        .bot {
+            color: #008000;
+            margin: 8px 0;
+        }
+        input {
+            width: 75%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 15px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>🤗 Ollama UI</h2>
+
+<div id="chat"></div>
+
+<input id="msg" placeholder="Type your message..." />
+<button onclick="send()">Send</button>
+
+<script>
+async function send() {
+    const input = document.getElementById("msg");
+    const chat = document.getElementById("chat");
+
+    const message = input.value.trim();
+    if (!message) return;
+
+    chat.innerHTML += `<div class="user"><b>You:</b> ${message}</div>`;
+    input.value = "";
+
+    try {
+        const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                message: message,
+                session_id: "ui-user"
+            })
+        });
+
+        const data = await res.json();
+
+        chat.innerHTML += `<div class="bot"><b>Bot:</b> ${data.reply}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+
+    } catch (err) {
+        chat.innerHTML += `<div class="bot"><b>Error:</b> Server not reachable</div>`;
+    }
+}
+</script>
+
+</body>
+</html>
